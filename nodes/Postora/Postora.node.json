@@ -1,17 +1,17 @@
 {
-	"node": "n8n-nodes-base.postiz",
+	"node": "n8n-nodes-base.postora",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Social Media", "Scheduling"],
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://docs.postiz.com/public-api"
+				"url": "https://postiz.walidmohamed.com"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://docs.postiz.com/public-api"
+				"url": "https://postiz.walidmohamed.com"
 			}
 		]
 	}

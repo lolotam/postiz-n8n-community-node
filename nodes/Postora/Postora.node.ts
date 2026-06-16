@@ -5,28 +5,66 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	NodeOperationError,
+	ILoadOptionsFunctions,
+	INodePropertyOptions,
 } from 'n8n-workflow';
 import { NodeConnectionType } from 'n8n-workflow';
-import { postizApiRequest } from './GenericFunctions';
+import { postoraApiRequest } from './GenericFunctions';
 
-export class Postiz implements INodeType {
+const platformNames: Record<string, string> = {
+	x: 'X (Twitter)',
+	linkedin: 'LinkedIn (Personal)',
+	'linkedin-page': 'LinkedIn (Page)',
+	reddit: 'Reddit',
+	instagram: 'Instagram',
+	'instagram-standalone': 'Instagram (Standalone)',
+	facebook: 'Facebook',
+	threads: 'Threads',
+	youtube: 'YouTube',
+	gmb: 'Google My Business',
+	tiktok: 'TikTok',
+	pinterest: 'Pinterest',
+	dribbble: 'Dribbble',
+	discord: 'Discord',
+	slack: 'Slack',
+	kick: 'Kick',
+	twitch: 'Twitch',
+	mastodon: 'Mastodon',
+	bluesky: 'Bluesky',
+	lemmy: 'Lemmy',
+	farcaster: 'Farcaster',
+	telegram: 'Telegram',
+	nostr: 'Nostr',
+	vk: 'VK',
+	medium: 'Medium',
+	'dev.to': 'Dev.to',
+	hashnode: 'Hashnode',
+	wordpress: 'WordPress',
+	listmonk: 'Listmonk',
+	moltbook: 'Moltbook',
+	whop: 'Whop',
+	skool: 'Skool',
+	mewe: 'MeWe',
+};
+
+export class Postora implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Postiz',
-		name: 'postiz',
+		displayName: 'Postora',
+		name: 'postora',
 		// eslint-disable-next-line n8n-nodes-base/node-class-description-icon-not-svg
-		icon: 'file:postiz.png',
+		icon: 'file:postora.png',
 		group: ['output'],
 		version: 1,
 		subtitle: '={{$parameter["operation"]}}',
-		description: 'Consume Postiz API',
+		description: 'Consume Postora API',
 		defaults: {
-			name: 'Postiz',
+			name: 'Postora',
 		},
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		credentials: [
 			{
-				name: 'postizApi',
+				name: 'postoraApi',
 				required: true,
 			},
 		],
@@ -40,8 +78,8 @@ export class Postiz implements INodeType {
 					{
 						name: 'Create Post',
 						value: 'createPost',
-						description: 'Schedule a post to Postiz',
-						action: 'Schedule a post to postiz',
+						description: 'Schedule a post to Postora',
+						action: 'Schedule a post to postora',
 					},
 					{
 						name: 'Delete Post',
@@ -70,8 +108,8 @@ export class Postiz implements INodeType {
 					{
 						name: 'Upload File',
 						value: 'uploadFile',
-						description: 'Upload a file to Postiz',
-						action: 'Upload a file to postiz',
+						description: 'Upload a file to Postora',
+						action: 'Upload a file to postora',
 					},
 					{
 						name: 'Video Function',
@@ -275,11 +313,107 @@ export class Postiz implements INodeType {
 				displayOptions: {
 					show: {
 						operation: ['createPost'],
+						type: ['schedule'],
 					},
 				},
 				default: '',
 				required: true,
 				description: 'Date and time for the post',
+			},
+			{
+				displayName: 'Platform',
+				name: 'platform',
+				type: 'options',
+				noDataExpression: true,
+				typeOptions: {
+					loadOptionsMethod: 'getPlatforms',
+				},
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+					},
+				},
+				description: 'Target platform for the post',
+			},
+			{
+				displayName: 'Social Accounts',
+				name: 'socialAccounts',
+				type: 'multiOptions',
+				noDataExpression: true,
+				typeOptions: {
+					loadOptionsMethod: 'getAccounts',
+					loadOptionsDependsOn: ['platform'],
+				},
+				default: [],
+				required: true,
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+					},
+				},
+				description: 'Select accounts/channels to post to',
+			},
+			{
+				displayName: 'Caption',
+				name: 'caption',
+				type: 'string',
+				typeOptions: {
+					rows: 4,
+				},
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+					},
+				},
+				description: 'The post caption / text content',
+			},
+			{
+				displayName: 'Media Source',
+				name: 'mediaSource',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{ name: 'None', value: 'none' },
+					{ name: 'URL', value: 'url' },
+					{ name: 'Binary Data', value: 'binary' },
+				],
+				default: 'none',
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+					},
+				},
+				description: 'How to attach media to the post',
+			},
+			{
+				displayName: 'Media URLs',
+				name: 'mediaUrls',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+						mediaSource: ['url'],
+					},
+				},
+				description: 'Comma-separated media URLs',
+			},
+			{
+				displayName: 'Binary Property',
+				name: 'mediaBinaryProperty',
+				type: 'string',
+				default: 'data',
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+						mediaSource: ['binary'],
+					},
+				},
+				description: 'Name of the binary property containing the media files',
 			},
 			{
 				displayName: 'Tags',
@@ -320,223 +454,6 @@ export class Postiz implements INodeType {
 					},
 				],
 				description: 'Tags for the post',
-			},
-			{
-				displayName: 'Posts',
-				name: 'posts',
-				placeholder: 'Add Post',
-				type: 'fixedCollection',
-				typeOptions: {
-					multipleValues: true,
-				},
-				displayOptions: {
-					show: {
-						operation: ['createPost'],
-					},
-				},
-				default: {},
-				options: [
-					{
-						name: 'post',
-						displayName: 'Post',
-						values: [
-							{
-								displayName: 'Channel ID',
-								name: 'integrationId',
-								type: 'string',
-								default: '',
-								required: true,
-								description:
-									'ID of the channel (you can get from the get channels operation or from the Postiz UI)',
-							},
-							{
-								displayName: 'Group',
-								name: 'group',
-								type: 'string',
-								default: '',
-								description: 'Post group',
-							},
-							{
-								displayName: 'Settings',
-								name: 'settings',
-								placeholder: 'Add Setting',
-								type: 'fixedCollection',
-								typeOptions: {
-									multipleValues: true,
-								},
-								default: {},
-								options: [
-									{
-										name: 'setting',
-										displayName: 'Setting',
-										values: [
-											{
-												displayName: 'Key',
-												name: 'key',
-												type: 'string',
-												default: '',
-												required: true,
-												description: 'Setting key',
-											},
-											{
-												displayName: 'Value',
-												name: 'stringValue',
-												type: 'string',
-												displayOptions: {
-													show: {
-														valueType: ['string'],
-													},
-												},
-												default: '',
-												required: true,
-												description: 'String value',
-											},
-											{
-												displayName: 'Value',
-												name: 'numberValue',
-												type: 'number',
-												displayOptions: {
-													show: {
-														valueType: ['number'],
-													},
-												},
-												default: 0,
-												required: true,
-												description: 'Number value',
-											},
-											{
-												displayName: 'Value',
-												name: 'booleanValue',
-												type: 'boolean',
-												displayOptions: {
-													show: {
-														valueType: ['boolean'],
-													},
-												},
-												default: false,
-												required: true,
-												description: 'Whether the setting is enabled',
-											},
-											{
-												displayName: 'Value',
-												name: 'jsonValue',
-												type: 'json',
-												displayOptions: {
-													show: {
-														valueType: ['json'],
-													},
-												},
-												default: '',
-												required: true,
-												description: 'JSON value (object or array)',
-											},
-											{
-												displayName: 'Value Type',
-												name: 'valueType',
-												type: 'options',
-												options: [
-													{
-														name: 'String',
-														value: 'string',
-													},
-													{
-														name: 'Number',
-														value: 'number',
-													},
-													{
-														name: 'Boolean',
-														value: 'boolean',
-													},
-													{
-														name: 'JSON',
-														value: 'json',
-													},
-												],
-												default: 'string',
-												required: true,
-												description: 'Type of the setting value',
-											},
-										],
-									},
-								],
-								description: 'Provider-specific settings',
-							},
-							{
-								displayName: 'Content Items',
-								name: 'value',
-								placeholder: 'Add Content Item',
-								type: 'fixedCollection',
-								typeOptions: {
-									multipleValues: true,
-								},
-								default: {},
-								options: [
-									{
-										name: 'contentItem',
-										displayName: 'Content Item',
-										values: [
-											{
-												displayName: 'Content',
-												name: 'content',
-												type: 'string',
-												typeOptions: {
-													rows: 4,
-												},
-												default: '',
-												required: true,
-												description: 'Content text',
-											},
-											{
-												displayName: 'ID',
-												name: 'id',
-												type: 'string',
-												default: '',
-												description: 'Content ID (optional)',
-											},
-											{
-												displayName: 'Images',
-												name: 'image',
-												placeholder: 'Add Image',
-												type: 'fixedCollection',
-												typeOptions: {
-													multipleValues: true,
-												},
-												default: {},
-												options: [
-													{
-														name: 'imageItem',
-														displayName: 'Image',
-														values: [
-															{
-																displayName: 'ID',
-																name: 'id',
-																type: 'string',
-																default: '',
-																required: true,
-																description: 'Image ID',
-															},
-															{
-																displayName: 'Path',
-																name: 'path',
-																type: 'string',
-																default: '',
-																required: true,
-																description: 'Image path/URL',
-															},
-														],
-													},
-												],
-												description: 'Images for this content item',
-											},
-										],
-									},
-								],
-								description: 'Content items (value array)',
-							},
-						],
-					},
-				],
-				description: 'Posts array (required for non-draft)',
 			},
 			// GetPosts parameters
 			{
@@ -608,6 +525,49 @@ export class Postiz implements INodeType {
 		],
 	};
 
+	methods = {
+		loadOptions: {
+			async getPlatforms(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const integrations = await postoraApiRequest.call(this, 'GET', '/integrations');
+				const counts: Record<string, number> = {};
+
+				if (integrations && Array.isArray(integrations)) {
+					for (const integration of integrations) {
+						if (integration.disabled) continue;
+						const platformId = integration.identifier;
+						if (platformId) {
+							counts[platformId] = (counts[platformId] || 0) + 1;
+						}
+					}
+				}
+
+				return Object.entries(platformNames).map(([key, name]) => {
+					const count = counts[key] || 0;
+					return {
+						name: `${name} (${count} connected)`,
+						value: key,
+					};
+				});
+			},
+
+			async getAccounts(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const platform = this.getCurrentNodeParameter('platform') as string;
+				const integrations = await postoraApiRequest.call(this, 'GET', '/integrations');
+
+				if (!integrations || !Array.isArray(integrations)) {
+					return [];
+				}
+
+				return integrations
+					.filter((integration: any) => integration.identifier === platform && !integration.disabled)
+					.map((integration: any) => ({
+						name: integration.profile || integration.name || 'Unknown Channel',
+						value: integration.id,
+					}));
+			},
+		},
+	};
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -619,16 +579,15 @@ export class Postiz implements INodeType {
 				const operation = this.getNodeParameter('operation', i);
 
 				if (operation === 'createPost') {
-					// Map CreatePostDto fields exactly
 					const type = this.getNodeParameter('type', i) as string;
 					const shortLink = this.getNodeParameter('shortLink', i) as boolean;
-					const date = this.getNodeParameter('date', i) as string;
-
-					// Get array parameters
-					const tagsParam = this.getNodeParameter('tags', i, {}) as any;
-					const postsParam = this.getNodeParameter('posts', i, {}) as any;
+					const date = this.getNodeParameter('date', i, '') as string;
+					const socialAccounts = this.getNodeParameter('socialAccounts', i) as string[];
+					const caption = this.getNodeParameter('caption', i) as string;
+					const mediaSource = this.getNodeParameter('mediaSource', i, 'none') as string;
 
 					// Process tags array
+					const tagsParam = this.getNodeParameter('tags', i, {}) as any;
 					const tags = tagsParam.tag
 						? tagsParam.tag.map((tag: any) => ({
 								value: tag.value,
@@ -636,74 +595,89 @@ export class Postiz implements INodeType {
 							}))
 						: [];
 
-					// Process posts array
-					const posts = postsParam.post
-						? postsParam.post.map((post: any) => {
-								// Process settings for this post
-								const settings: any = {};
+					// Handle media uploads and mapping
+					const uploadedMedia: Array<{ id: string; path: string }> = [];
 
-								if (post.settings?.setting && post.settings.setting.length > 0) {
-									post.settings.setting.forEach((setting: any) => {
-										// Determine the actual value based on the selected type
-										let value;
-										switch (setting.valueType) {
-											case 'string':
-												value = setting.stringValue;
-												break;
-											case 'number':
-												value = setting.numberValue;
-												break;
-											case 'boolean':
-												value = setting.booleanValue;
-												break;
-											case 'json':
-												try {
-													value = JSON.parse(setting.jsonValue);
-												} catch {
-													value = setting.jsonValue;
-												}
-												break;
-											default:
-												value = setting.stringValue; // fallback to string
-										}
-										settings[setting.key] = value;
-									});
+					if (mediaSource === 'url') {
+						const mediaUrlsStr = this.getNodeParameter('mediaUrls', i, '') as string;
+						const mediaUrls = mediaUrlsStr
+							.split(',')
+							.map((s) => s.trim())
+							.filter((s) => {
+								if (!s) return false;
+								try {
+									new URL(s);
+									return true;
+								} catch {
+									return false;
 								}
+							});
 
-								// Process value array (PostContent[])
-								const value = post.value?.contentItem
-									? post.value.contentItem.map((item: any) => ({
-											content: item.content,
-											id: item.id || '',
-											image: item.image?.imageItem
-												? item.image.imageItem.map((img: any) => ({
-														id: img.id,
-														path: img.path,
-													}))
-												: [],
-										}))
-									: [];
+						for (const mediaUrl of mediaUrls) {
+							const uploadRes = await postoraApiRequest.call(this, 'POST', '/upload-from-url', {
+								url: mediaUrl,
+							});
+							if (uploadRes && uploadRes.id && uploadRes.path) {
+								uploadedMedia.push({
+									id: uploadRes.id,
+									path: uploadRes.path,
+								});
+							}
+						}
+					} else if (mediaSource === 'binary') {
+						const binaryProp = this.getNodeParameter('mediaBinaryProperty', i, 'data') as string;
+						const binaryProps = binaryProp
+							.split(',')
+							.map((p) => p.trim())
+							.filter(Boolean);
 
-								return {
-									integration: {
-										id: post.integrationId,
-									},
-									value,
-									group: post.group || '',
-									settings,
-								};
-							})
-						: [];
+						for (const prop of binaryProps) {
+							const bd = this.helpers.assertBinaryData(i, prop);
+							const buf = await this.helpers.getBinaryDataBuffer(i, prop);
+							const mimeType = bd.mimeType || 'application/octet-stream';
+
+							const blob = new Blob([buf], { type: mimeType });
+							const formData = new FormData();
+							formData.append('file', blob, bd.fileName || 'upload');
+
+							const uploadRes = await postoraApiRequest.call(this, 'POST', '/upload', formData);
+							if (uploadRes && uploadRes.id && uploadRes.path) {
+								uploadedMedia.push({
+									id: uploadRes.id,
+									path: uploadRes.path,
+								});
+							}
+						}
+					}
+
+					// Assemble the strict Postiz payload
+					// Each chosen account in socialAccounts will get a post entry in the posts array
+					const posts = socialAccounts.map((accountId) => {
+						return {
+							integration: {
+								id: accountId,
+							},
+							value: [
+								{
+									content: caption,
+									id: '',
+									image: uploadedMedia,
+								},
+							],
+							group: '',
+							settings: {},
+						};
+					});
 
 					const body = {
 						type,
 						shortLink,
-						date,
+						date: type === 'schedule' ? date : new Date().toISOString(),
 						tags,
 						posts,
 					};
 
-					responseData = await postizApiRequest.call(this, 'POST', '/posts', body);
+					responseData = await postoraApiRequest.call(this, 'POST', '/posts', body);
 				}
 
 				if (operation === 'getPosts') {
@@ -717,7 +691,7 @@ export class Postiz implements INodeType {
 						...(customer && { customer }),
 					};
 
-					responseData = await postizApiRequest.call(this, 'GET', '/posts', {}, query);
+					responseData = await postoraApiRequest.call(this, 'GET', '/posts', {}, query);
 				}
 
 				if (operation === 'uploadFile') {
@@ -740,16 +714,16 @@ export class Postiz implements INodeType {
 
 					const formData = new FormData();
 					formData.append('file', blob, binaryData.fileName);
-					responseData = await postizApiRequest.call(this, 'POST', '/upload', formData);
+					responseData = await postoraApiRequest.call(this, 'POST', '/upload', formData);
 				}
 
 				if (operation === 'getIntegrations') {
-					responseData = await postizApiRequest.call(this, 'GET', '/integrations');
+					responseData = await postoraApiRequest.call(this, 'GET', '/integrations');
 				}
 
 				if (operation === 'deletePost') {
 					const postId = this.getNodeParameter('postId', i) as string;
-					responseData = await postizApiRequest.call(this, 'DELETE', `/posts/${postId}`);
+					responseData = await postoraApiRequest.call(this, 'DELETE', `/posts/${postId}`);
 				}
 
 				if (operation === 'generateVideo') {
@@ -775,7 +749,7 @@ export class Postiz implements INodeType {
 						});
 					}
 
-					responseData = await postizApiRequest.call(this, 'POST', '/generate-video', body);
+					responseData = await postoraApiRequest.call(this, 'POST', '/generate-video', body);
 				}
 
 				if (operation === 'videoFunction') {
@@ -802,7 +776,7 @@ export class Postiz implements INodeType {
 						});
 					}
 
-					responseData = await postizApiRequest.call(this, 'POST', '/video/function', body);
+					responseData = await postoraApiRequest.call(this, 'POST', '/video/function', body);
 				}
 
 				const executionData = this.helpers.constructExecutionMetaData(
