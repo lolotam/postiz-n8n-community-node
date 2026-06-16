@@ -317,7 +317,6 @@ export class Postora implements INodeType {
 					},
 				},
 				default: '',
-				required: true,
 				description: 'Date and time for the post',
 			},
 			{
@@ -439,7 +438,6 @@ export class Postora implements INodeType {
 								name: 'value',
 								type: 'string',
 								default: '',
-								required: true,
 								description: 'Tag value',
 							},
 							{
@@ -447,7 +445,6 @@ export class Postora implements INodeType {
 								name: 'label',
 								type: 'string',
 								default: '',
-								required: true,
 								description: 'Tag label',
 							},
 						],
@@ -582,17 +579,25 @@ export class Postora implements INodeType {
 					const type = this.getNodeParameter('type', i) as string;
 					const shortLink = this.getNodeParameter('shortLink', i) as boolean;
 					const date = this.getNodeParameter('date', i, '') as string;
+
+					if (type === 'schedule' && !date) {
+						throw new NodeOperationError(this.getNode(), 'Please provide a publish date for scheduled posts.', {
+							itemIndex: i,
+						});
+					}
 					const socialAccounts = this.getNodeParameter('socialAccounts', i) as string[];
 					const caption = this.getNodeParameter('caption', i) as string;
 					const mediaSource = this.getNodeParameter('mediaSource', i, 'none') as string;
 
-					// Process tags array
+					// Process tags array (only include tags with both value and label defined)
 					const tagsParam = this.getNodeParameter('tags', i, {}) as any;
 					const tags = tagsParam.tag
-						? tagsParam.tag.map((tag: any) => ({
-								value: tag.value,
-								label: tag.label,
-							}))
+						? tagsParam.tag
+								.filter((tag: any) => tag.value && tag.label)
+								.map((tag: any) => ({
+									value: tag.value,
+									label: tag.label,
+								}))
 						: [];
 
 					// Handle media uploads and mapping

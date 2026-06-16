@@ -36,7 +36,14 @@ export async function postoraApiRequest(
 	options = Object.assign({}, options, option);
 	try {
 		return await this.helpers.httpRequestWithAuthentication.call(this, 'postoraApi', options);
-	} catch (error) {
+	} catch (error: any) {
+		if (error.response && error.response.body) {
+			const body = error.response.body;
+			if (body.message) {
+				const details = Array.isArray(body.message) ? body.message.join(', ') : String(body.message);
+				error.message = `${error.message} - ${details}`;
+			}
+		}
 		throw new NodeApiError(this.getNode(), error as JsonObject);
 	}
 }
