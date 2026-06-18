@@ -14,7 +14,7 @@
 
 ## 🌟 Overview
 
-[Postora](https://postiz.walidmohamed.com) is an open-source, self-hosted social media management tool (built on Postiz). This community node enables you to seamlessly connect n8n workflows with your Postora instance. 
+[Postora](https://postora.walidmohamed.com) is an open-source, self-hosted social media management tool (built on Postiz). This community node enables you to seamlessly connect n8n workflows with your Postora instance. 
 
 For example, you can load content from RSS feeds or AI generators, process or format it, automatically upload the media, and post or schedule to multiple social media channels in one single action.
 
@@ -89,7 +89,7 @@ The node transforms the simplified single-platform multi-account UI input into t
 When configuring the **Postora API** credentials in your n8n workspace:
 
 1.  **API Key:** Your Postora organization API key (obtainable from Settings → API Keys).
-2.  **Host:** The base URL of your self-hosted Postora backend instance (e.g., `https://postiz.walidmohamed.com/api`).
+2.  **Host:** The base URL of your self-hosted Postora backend instance (e.g., `https://postora.walidmohamed.com/api`).
     > [!IMPORTANT]
     > The host URL must end with `/api`. The node automatically appends `/public/v1/` under the hood.
 

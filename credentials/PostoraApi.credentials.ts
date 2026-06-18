@@ -8,7 +8,7 @@ import {
 export class PostoraApi implements ICredentialType {
 	name = 'postoraApi';
 	displayName = 'Postora API';
-	documentationUrl = 'https://postiz.walidmohamed.com';
+	documentationUrl = 'https://postora.walidmohamed.com';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',
@@ -21,7 +21,7 @@ export class PostoraApi implements ICredentialType {
 			displayName: 'Host',
 			name: 'host',
 			type: 'string',
-			default: 'https://postiz.walidmohamed.com/api',
+			default: 'https://postora.walidmohamed.com/api',
 		},
 	];
 
