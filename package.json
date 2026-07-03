@@ -1,11 +1,15 @@
 {
   "name": "n8n-nodes-postora-2",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The ultimate social media scheduling tool",
   "keywords": [
-    "social media",
-    "scheduling tool",
-    "social media scheduling tool",
+    "n8n",
+    "n8n-nodes-postora-2",
+    "postora",
+    "postiz",
+    "social-media",
+    "scheduling-tool",
+    "automation",
     "n8n-community-node-package"
   ],
   "license": "MIT",
@@ -39,7 +43,7 @@
       "dist/credentials/PostoraApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Postora/Postora.node.js"
+      "dist/nodes/Postora/Postora2.node.js"
     ]
   },
   "devDependencies": {

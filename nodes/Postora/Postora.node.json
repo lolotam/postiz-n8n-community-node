@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.postora",
+	"node": "n8n-nodes-postora-2.postora2",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Social Media", "Scheduling"],

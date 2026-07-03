@@ -19,7 +19,7 @@ export async function postoraApiRequest(
 	query: IDataObject = {},
 	option: IDataObject = {},
 ): Promise<any> {
-	const credentials = await this.getCredentials('postoraApi');
+	const credentials = await this.getCredentials('postora2Api');
 
 	let options: IHttpRequestOptions = {
 		baseURL: credentials.host + '/public/v1' as string,
@@ -35,7 +35,7 @@ export async function postoraApiRequest(
 	
 	options = Object.assign({}, options, option);
 	try {
-		return await this.helpers.httpRequestWithAuthentication.call(this, 'postoraApi', options);
+		return await this.helpers.httpRequestWithAuthentication.call(this, 'postora2Api', options);
 	} catch (error: any) {
 		if (error.response && error.response.body) {
 			const body = error.response.body;

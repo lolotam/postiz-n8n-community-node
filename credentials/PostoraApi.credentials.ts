@@ -6,7 +6,7 @@ import {
 } from 'n8n-workflow';
 
 export class PostoraApi implements ICredentialType {
-	name = 'postoraApi';
+	name = 'postora2Api';
 	displayName = 'Postora API';
 	documentationUrl = 'https://postora.walidmohamed.com';
 	properties: INodeProperties[] = [

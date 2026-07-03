@@ -47,10 +47,10 @@ const platformNames: Record<string, string> = {
 	mewe: 'MeWe',
 };
 
-export class Postora implements INodeType {
+export class Postora2 implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Postora',
-		name: 'postora',
+		name: 'postora2',
 		// eslint-disable-next-line n8n-nodes-base/node-class-description-icon-not-svg
 		icon: 'file:postora.png',
 		group: ['output'],
@@ -64,7 +64,7 @@ export class Postora implements INodeType {
 		outputs: [NodeConnectionType.Main],
 		credentials: [
 			{
-				name: 'postoraApi',
+				name: 'postora2Api',
 				required: true,
 			},
 		],
