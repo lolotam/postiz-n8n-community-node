@@ -1,4 +1,4 @@
-# n8n-nodes-postora
+# n8n-nodes-postora-2
 
 <p align="center">
   <img src="community-node.png" alt="Postora logo" width="120px" height="120px" style="border-radius: 20%; box-shadow: 0 8px 30px rgba(0,0,0,0.12);" />
@@ -100,7 +100,7 @@ When configuring the **Postora API** credentials in your n8n workspace:
 ### Quick Installation (n8n Community Nodes UI)
 1. In n8n, navigate to **Settings > Community Nodes**.
 2. Click **Install a Node**.
-3. Enter `n8n-nodes-postora` in the **npm Package Name** field.
+3. Enter `n8n-nodes-postora-2` in the **npm Package Name** field.
 4. Agree to the risks and click **Install**.
 
 ---
@@ -121,15 +121,15 @@ If you want to modify this node or run it locally:
     ```
 3.  **Link the node to your local n8n installation:**
     *   Find your local n8n data directory (typically `~/.n8n/` or `C:\Users\<User>\.n8n\`).
-    *   Create a symbolic link or junction in `~/.n8n/nodes/node_modules/n8n-nodes-postora` pointing to this directory:
+    *   Create a symbolic link or junction in `~/.n8n/nodes/node_modules/n8n-nodes-postora-2` pointing to this directory:
         ```powershell
         # On Windows (PowerShell)
-        New-Item -ItemType Junction -Path "C:\Users\<YourUser>\.n8n\nodes\node_modules\n8n-nodes-postora" -Target "C:\path\to\postiz-n8n-community-node"
+        New-Item -ItemType Junction -Path "C:\Users\<YourUser>\.n8n\nodes\node_modules\n8n-nodes-postora-2" -Target "C:\path\to\postiz-n8n-community-node"
         ```
     *   Add the dependency reference to `~/.n8n/nodes/package.json`:
         ```json
         "dependencies": {
-          "n8n-nodes-postora": "file:C:/path/to/postiz-n8n-community-node"
+          "n8n-nodes-postora-2": "file:C:/path/to/postiz-n8n-community-node"
         }
         ```
 4.  **Restart n8n:**
