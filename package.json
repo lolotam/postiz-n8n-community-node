@@ -10,6 +10,10 @@
   ],
   "license": "MIT",
   "homepage": "https://postora.walidmohamed.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lolotam/postiz-n8n-community-node"
+  },
   "author": {
     "name": "Walid Mohamed"
   },
