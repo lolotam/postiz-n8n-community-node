@@ -320,7 +320,7 @@ export class Postora implements INodeType {
 				description: 'Date and time for the post',
 			},
 			{
-				displayName: 'Platform',
+				displayName: 'Platform Name or ID',
 				name: 'platform',
 				type: 'options',
 				noDataExpression: true,
@@ -334,10 +334,10 @@ export class Postora implements INodeType {
 						operation: ['createPost'],
 					},
 				},
-				description: 'Target platform for the post',
+				description: 'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
 			{
-				displayName: 'Social Accounts',
+				displayName: 'Social Account Names or IDs',
 				name: 'socialAccounts',
 				type: 'multiOptions',
 				noDataExpression: true,
@@ -352,7 +352,7 @@ export class Postora implements INodeType {
 						operation: ['createPost'],
 					},
 				},
-				description: 'Select accounts/channels to post to',
+				description: 'Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
 			{
 				displayName: 'Caption',
