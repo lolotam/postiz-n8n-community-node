@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-postora-2",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The ultimate social media scheduling tool",
   "keywords": [
     "n8n",
@@ -31,7 +31,8 @@
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json",
+    "test:metadata": "node scripts/validate-n8n-metadata.js",
+    "prepublishOnly": "npm run build && npm run lint -c .eslintrc.prepublish.js nodes credentials package.json && npm run test:metadata",
     "publish-n8n": "pnpm publish --access public"
   },
   "files": [

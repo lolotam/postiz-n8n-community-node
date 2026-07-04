@@ -49,7 +49,7 @@ const platformNames: Record<string, string> = {
 
 export class Postora2 implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'Postora',
+		displayName: 'Postora 2',
 		name: 'postora2',
 		// eslint-disable-next-line n8n-nodes-base/node-class-description-icon-not-svg
 		icon: 'file:postora.png',
@@ -58,7 +58,7 @@ export class Postora2 implements INodeType {
 		subtitle: '={{$parameter["operation"]}}',
 		description: 'Consume Postora API',
 		defaults: {
-			name: 'Postora',
+			name: 'Postora 2',
 		},
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],

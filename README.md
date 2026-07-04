@@ -103,7 +103,7 @@ When configuring the **Postora API** credentials in your n8n workspace:
 3. Enter `n8n-nodes-postora-2` in the **npm Package Name** field.
 4. Agree to the risks and click **Install**.
 
-If you previously installed `n8n-nodes-postora`, uninstall it first or restart n8n after removing it. This package uses its own internal node and credential names to avoid collisions with that older package.
+This package can be installed alongside `n8n-nodes-postora`. Its node appears as **Postora 2** in n8n so it does not collide with the older **Postora** node.
 
 ---
 
