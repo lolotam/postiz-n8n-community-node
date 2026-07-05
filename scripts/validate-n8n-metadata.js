@@ -13,7 +13,18 @@ function getStringProperty(source, propertyName) {
 const displayName = getStringProperty(nodeSource, 'displayName');
 const defaultNameMatch = nodeSource.match(/defaults:\s*{\s*name:\s*'([^']+)'/m);
 assert(defaultNameMatch, 'Could not find defaults.name in Postora2 node description');
+const expectedVisibleName = 'Postora.W.M';
 
+assert.strictEqual(
+	displayName,
+	expectedVisibleName,
+	`displayName must be ${expectedVisibleName} for n8n-nodes-postora-2`,
+);
+assert.strictEqual(
+	defaultNameMatch[1],
+	expectedVisibleName,
+	`defaults.name must be ${expectedVisibleName} for n8n-nodes-postora-2`,
+);
 assert.notStrictEqual(
 	displayName,
 	'Postora',
