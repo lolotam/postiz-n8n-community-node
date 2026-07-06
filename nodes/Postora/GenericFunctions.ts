@@ -37,11 +37,24 @@ export async function postoraApiRequest(
 	try {
 		return await this.helpers.httpRequestWithAuthentication.call(this, 'postora2Api', options);
 	} catch (error: any) {
-		if (error.response && error.response.body) {
-			const body = error.response.body;
-			if (body.message) {
-				const details = Array.isArray(body.message) ? body.message.join(', ') : String(body.message);
-				error.message = `${error.message} - ${details}`;
+		// Surface backend validation details (e.g. Instagram post_type requirement, 400 errors)
+		const resp = error.response;
+		if (resp) {
+			const rawBody = resp.body;
+			let detail = '';
+			if (rawBody && typeof rawBody === 'object') {
+				if (Array.isArray(rawBody.message)) {
+					detail = rawBody.message.join(', ');
+				} else if (rawBody.message) {
+					detail = String(rawBody.message);
+				} else if (rawBody.error) {
+					detail = String(rawBody.error);
+				}
+			} else if (typeof rawBody === 'string' && rawBody) {
+				detail = rawBody;
+			}
+			if (detail) {
+				error.message = `${error.message}${detail ? ` - ${detail}` : ''}`;
 			}
 		}
 		throw new NodeApiError(this.getNode(), error as JsonObject);

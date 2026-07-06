@@ -415,6 +415,22 @@ export class Postora2 implements INodeType {
 				description: 'Name of the binary property containing the media files',
 			},
 			{
+				displayName: 'Instagram Post Type',
+				name: 'instagramPostType',
+				type: 'options',
+				displayOptions: {
+					show: {
+						operation: ['createPost'],
+					},
+				},
+				options: [
+					{ name: 'Feed Post', value: 'post', description: 'Publish as an Instagram feed post (requires media)' },
+					{ name: 'Story', value: 'story', description: 'Publish as an Instagram story (requires media)' },
+				],
+				default: 'post',
+				description: 'Required for Instagram/Instagram Standalone. Ignored for other platforms.',
+			},
+			{
 				displayName: 'Tags',
 				name: 'tags',
 				placeholder: 'Add Tag',
@@ -579,6 +595,7 @@ export class Postora2 implements INodeType {
 					const type = this.getNodeParameter('type', i) as string;
 					const shortLink = this.getNodeParameter('shortLink', i) as boolean;
 					const date = this.getNodeParameter('date', i, '') as string;
+					const platform = this.getNodeParameter('platform', i) as string;
 
 					if (type === 'schedule' && !date) {
 						throw new NodeOperationError(this.getNode(), 'Please provide a publish date for scheduled posts.', {
@@ -588,6 +605,26 @@ export class Postora2 implements INodeType {
 					const socialAccounts = this.getNodeParameter('socialAccounts', i) as string[];
 					const caption = this.getNodeParameter('caption', i) as string;
 					const mediaSource = this.getNodeParameter('mediaSource', i, 'none') as string;
+					const instagramPostType = this.getNodeParameter('instagramPostType', i, 'post') as string;
+
+					// Platform-specific pre-validation (matches backend DTO + provider rules)
+					// Instagram requires at least one media attachment (no text-only posts)
+					const isInstagram = platform === 'instagram' || platform === 'instagram-standalone';
+					if (isInstagram && mediaSource === 'none') {
+						throw new NodeOperationError(
+							this.getNode(),
+							'Instagram requires at least one image or video. Please set Media Source to URL or Binary Data.',
+							{ itemIndex: i },
+						);
+					}
+					// Threads has a 500-character caption limit
+					if (platform === 'threads' && caption.length > 500) {
+						throw new NodeOperationError(
+							this.getNode(),
+							`Threads captions are limited to 500 characters (received ${caption.length}). Please shorten the caption.`,
+							{ itemIndex: i },
+						);
+					}
 
 					// Process tags array (only include tags with both value and label defined)
 					const tagsParam = this.getNodeParameter('tags', i, {}) as any;
@@ -655,24 +692,31 @@ export class Postora2 implements INodeType {
 						}
 					}
 
-					// Assemble the strict Postiz payload
-					// Each chosen account in socialAccounts will get a post entry in the posts array
-					const posts = socialAccounts.map((accountId) => {
-						return {
-							integration: {
-								id: accountId,
+				// Assemble the strict Postiz payload
+				// Each chosen account in socialAccounts will get a post entry in the posts array.
+				// settings must carry platform-specific fields:
+				//   - Instagram requires { post_type: 'post' | 'story' } (instagram.dto.ts)
+				//   - __type is injected by the backend from the integration's providerIdentifier
+				const settings: Record<string, any> = {};
+				if (isInstagram) {
+					settings.post_type = instagramPostType;
+				}
+				const posts = socialAccounts.map((accountId) => {
+					return {
+						integration: {
+							id: accountId,
+						},
+						value: [
+							{
+								content: caption,
+								id: '',
+								image: uploadedMedia,
 							},
-							value: [
-								{
-									content: caption,
-									id: '',
-									image: uploadedMedia,
-								},
-							],
-							group: '',
-							settings: {},
-						};
-					});
+						],
+						group: '',
+						settings,
+					};
+				});
 
 					const body = {
 						type,
